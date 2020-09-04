@@ -21,10 +21,10 @@ async function getAndFormatAccount(accessToken, account) {
     const transactions = response.data.transactions;
     return {
       acc_number: account.acc_number,
-      amout: account.amount,
+      amount: account.amount,
       transactions: transactions.map((transaction) => ({
         label: transaction.label,
-        amout: transaction.amount,
+        amount: transaction.amount,
         currency: transaction.currency,
       })),
     };
