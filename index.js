@@ -1,13 +1,25 @@
 const qs = require("qs");
 const axios = require("axios");
 
-const apiUrl = 'http://localhost';
-const apiPort = '3000';
+const apiUrl = "http://localhost";
+const apiPort = "3000";
 
 const apiBaseUrl = `${apiUrl}:${apiPort}`;
 
+function generateConfigWithPagination(config, page) {
+  return {
+    ...config,
+    params: {
+      ...config.params,
+      page,
+    },
+  }
+}
+
 async function getAndFormatAccount(accessToken, account) {
-  const configTransactions = {
+  let page = 1;
+  let hasNext = true;
+  const configTransaction = {
     baseURL: apiBaseUrl,
     method: "get",
     url: `/accounts/${account.acc_number}/transactions`,
@@ -16,20 +28,30 @@ async function getAndFormatAccount(accessToken, account) {
       "Content-Type": "application/json",
     },
   };
+  const accountWithTransactions = {
+    acc_number: account.acc_number,
+    amount: account.amount,
+    transactions: [],
+  };
   try {
-    const response = await axios(configTransactions);
-    const transactions = response.data.transactions;
-    return {
-      acc_number: account.acc_number,
-      amount: account.amount,
-      transactions: transactions.map((transaction) => ({
-        label: transaction.label,
-        amount: transaction.amount,
-        currency: transaction.currency,
-      })),
-    };
+    while (hasNext) {
+      const response = await axios(generateConfigWithPagination(configTransaction, page));
+      const transactions = response.data.transactions;
+      accountWithTransactions.transactions.push(
+        ...transactions.map((transaction) => ({
+          label: transaction.label,
+          amount: transaction.amount,
+          currency: transaction.currency,
+        }))
+      );
+      page += 1;
+      if (!response.data.link || !response.data.link.next) {
+        hasNext = false;
+      }
+    }
+    return accountWithTransactions;
   } catch (error) {
-    return {};
+    return accountWithTransactions;
   }
 }
 
@@ -73,6 +95,10 @@ async function main() {
     try {
       const response = await axios(configToken);
       const accessToken = response.data.access_token;
+
+      let page = 1;
+      let hasNext = true;
+
       const configAccounts = {
         baseURL: apiBaseUrl,
         method: "get",
@@ -82,11 +108,31 @@ async function main() {
           "Content-Type": "application/json",
         },
       };
+
+      const accounts = [];
+
       try {
-        const response = await axios(configAccounts);
-        const accounts = response.data.account;
+        while (hasNext) {
+          const response = await axios(generateConfigWithPagination(configAccounts, page));
+          accounts.push(...response.data.account);
+          page += 1;
+          if (!response.data.link || !response.data.link.next) {
+            hasNext = false;
+          }
+        }
+        const uniqueAccounts = accounts.reduce(
+          (unique, item) =>
+            unique.find(
+              (uniqueItem) => uniqueItem.acc_number === item.acc_number
+            )
+              ? unique
+              : [...unique, item],
+          []
+        );
         const formatedAccount = await Promise.all(
-          accounts.map((account) => getAndFormatAccount(accessToken, account))
+          uniqueAccounts.map((account) =>
+            getAndFormatAccount(accessToken, account)
+          )
         );
         console.log(formatedAccount);
       } catch (error) {
