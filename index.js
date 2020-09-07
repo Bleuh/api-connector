@@ -13,7 +13,7 @@ function generateConfigWithPagination(config, page) {
       ...config.params,
       page,
     },
-  }
+  };
 }
 
 async function getAndFormatAccount(accessToken, account) {
@@ -35,7 +35,9 @@ async function getAndFormatAccount(accessToken, account) {
   };
   try {
     while (hasNext) {
-      const response = await axios(generateConfigWithPagination(configTransaction, page));
+      const response = await axios(
+        generateConfigWithPagination(configTransaction, page)
+      );
       const transactions = response.data.transactions;
       accountWithTransactions.transactions.push(
         ...transactions.map((transaction) => ({
@@ -113,7 +115,9 @@ async function main() {
 
       try {
         while (hasNext) {
-          const response = await axios(generateConfigWithPagination(configAccounts, page));
+          const response = await axios(
+            generateConfigWithPagination(configAccounts, page)
+          );
           accounts.push(...response.data.account);
           page += 1;
           if (!response.data.link || !response.data.link.next) {
