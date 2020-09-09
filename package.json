@@ -1,6 +1,6 @@
 {
   "name": "api-connector",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Api connector",
   "main": "index.js",
   "scripts": {
