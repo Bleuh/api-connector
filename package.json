@@ -1,0 +1,28 @@
+{
+  "name": "api-connector",
+  "version": "1.0.0",
+  "description": "Api connector",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.20.0",
+    "dotenv": "^8.2.0",
+    "qs": "^6.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bleuh/api-connector.git"
+  },
+  "keywords": [
+    "script",
+    "javascript"
+  ],
+  "author": "Bastien DOUIB",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Bleuh/api-connector/issues"
+  },
+  "homepage": "https://github.com/Bleuh/api-connector#readme"
+}
